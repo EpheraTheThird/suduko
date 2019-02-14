@@ -6,13 +6,80 @@ $(document).on("click",".int",function(){
         fullCells++;
     }
 })
-function getNum(){
-    var num=prompt("enter number","")
-    if(num==!null){
-        return num;
+$("#checkEnd").click(function(){
+    if(!checkFullBoard()){
+        alert("your board is not full")
+        return false;
+    }
+    if(!checkLineFull()){
+        alert("you fill the board incorect")
+        return false;
+    }
+    if(!checkRowFull()){
+        alert("you fill the board incorect")
+        return false;
+    }
+    if(checkTableFull()){
+        alert("you win")
+        return true;
     }
     else{
+        alert("you fill the board incorect")
+        return false
+    }
+})
+function checkRowFull(){
+    var t=false
+    for(var x=1;x<=9;x++){
+        for(var y=0;y<9;y++){
+            if(checkLine(y,x)){
+                t=true
+                break
+            }
+        }
+        if(t==false){
+            return false
+        }
+        t=false;
+    }
+    return true
+}
+function fillRow(int){
+    Row=$(".Row"+int)
+    for(var x=0;x<9;x++){
+        $("#"+Row[x].id).html(x+1)
+    }
+}
+function checkLineFull(){
+    var t=false
+    for(var x=1;x<=9;x++){
+        for(var y=0;y<9;y++){
+            if(checkRow(y,x)){
+                t=true
+                break
+            }
+        }
+        if(t==false){
+            return false
+        }
+        t=false;
+    }
+    return true
+}
+
+function fillLine(int){
+    line=$(".Hight"+int)
+    for(var x=0;x<9;x++){
+        $("#"+line[x].id).html(x+1)
+    }
+}
+function getNum(){
+    var num=prompt("enter number","")
+    if(num==null){
         return null;
+    }
+    else{
+        return num;
     }
 }
 function createBoard(){
@@ -60,7 +127,7 @@ function fillBoard(int){
                     var numTable=0;
                     switch(Math.floor(numRow/3)){
                         case 0:
-                            numTable=0;
+                            numTable=1;
                             break;
                         case 1:
                             numTable=4;
