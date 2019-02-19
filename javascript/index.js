@@ -189,9 +189,9 @@ function checkRow(numRow, int){
     return false;  
 }
 function checkLine(numLine,int){
-    for(var x=0;x<board[numLine].length;x++){
-        console.log(board[numLine][x])
-        if(board[numLine][x]==int){
+    for(var x=0;x<9;x++){
+        console.log(board[x][numLine])
+        if(board[x][numLine]==int){
             return true
         }
     }
