@@ -82,11 +82,25 @@ function getNum(){
         return num;
     }
 }
+function createClearBoard(){
+    return [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+    ]
+}
 function createBoard(){
-    var table=1;
+    board=createClearBoard();
+    console.log(board);
     for(var x=0; x<9;x++){
         $("#boardTable").append("<tr id=\"outR"+x+"\" class=\"row\"></tr")
-        var miniTableRow=x%3
+        var miniTableRow=x%3;
         for(y=0;y<9;y++){
             var miniTablehight=y%3;
             switch(Math.floor(x/3)){
@@ -105,85 +119,94 @@ function createBoard(){
     }
 }
 function fillBoard(int){
-    var cnt=0;
-    while(cnt<int){
-        var random=Math.floor(Math.random()*88);
-        var fill=Math.floor(Math.random()*9)+1;
-        console.log('fillBoard cnt, random, fill:',cnt, random, fill);
-        var id="int"+random;
-        if($("#"+id).hasClass("Full")){
-            console.log("#"+id+" hasClass-Full --> continue");
-            continue;
-        }else{
-            var numRow=Math.floor(random/10)
-            if(checkRow(numRow,fill)){
-                console.log("checkRow numRow="+numRow+",fill --> continue");
-                continue;
-            }else{
-                var numLine=Math.floor(random/10)
-                if(checkLine(numLine,fill)){
-                    console.log("checkLine numLine="+numLine+",fill --> continue");
-                    continue;
-                }else{
-                    var numTable=0;
-                    switch(Math.floor(numRow/3)){
-                        case 0:
-                            numTable=1;
-                            break;
-                        case 1:
-                            numTable=4;
-                            break;
-                        case 2:
-                            numTable=7;
-                            break;
-                    }
-                    numTable=numTable+numLine
-                    if(checkTable(numTable,fill)){
-                        console.log("checkTable numTable="+numTable+",fill --> continue");
-                        continue;
-                    }else{
-                        $("#"+id).html(fill)
-                        $("#"+id).toggleClass("Full")
-                        cnt++;
-                        fullCells++;
-                    }
-                }
+    while(checkFullCells()<int){
+        var numRow=Math.floor(Math.random()*9);
+        var numLine=Math.floor(Math.random()*9);
+        var num=Math.floor(Math.random()*8)+1
+        console.log("row "+numRow+" line "+numLine+" num "+num);
+        if(insertNum(num,numLine,numRow)){
+            fullCells++;
+        }
+    }
+}
+function getTable(numRow,numLine){
+    var table=[]
+    var lines;
+    var rows;
+    switch(Math.floor(numRow/3)){
+        case 0:
+            rows=[0,1,2]
+            break;
+        case 1:
+            rows=[3,4,5]
+            break;
+        case 2:
+            rows=[6,7,8];
+            break;
+    }
+    switch(Math.floor(numLine/3)){
+        case 0:
+            lines=[0,1,2];
+            break;
+        case 1:
+            lines=[3,4,5];
+            break;
+        case 2:
+            lines=[6,7,8];
+            break;
+    }
+    table=findTable(rows,lines)
+    return table
+}
+function findTable(rows,lines){
+    var table=[[],[],[]];
+    for(var x=0;x<3;x++){
+        for(var y=0;y<3;y++){
+            table[x][y]=board[rows[x]][lines[y]];
+        }
+    }
+    return table;
+}
+function checkFullCells(){
+    cnt=0
+    for(var x=0;x<9;x++){
+        for(var y=0;y<9;y++){
+            if(board[x][y]!==0){
+                cnt++;
+                console.log(board[[x][y]])
             }
         }
     }
+    return cnt
 }
 function checkRow(numRow, int){
-    var Row=$(".Row"+numRow)
-    for(var x=0;x<Row.length;x++){
-        var intText=""+int;
-        var text=Row[x].innerHTML;
-        if(intText==text){
+    for(var x=0;x<board[numRow].length;x++){
+        console.log(board[numRow][x])
+        if(board[numRow][x]==int){
             return true
         }
     }
-    return false
+    return false;  
 }
 function checkLine(numLine,int){
-    var Line=$(".Hight"+numLine)
-    for(var x=0;x<Line.length;x++){
-        var intText=""+int;
-        var text=Line[x].innerHTML;
-        if(intText==text){
+    for(var x=0;x<board[numLine].length;x++){
+        console.log(board[numLine][x])
+        if(board[numLine][x]==int){
             return true
         }
     }
-    return false
-}
-function checkTable(numTable,int){
-    var table=$(".table"+numTable)
-    for(var x=0;x<table.length;x++){
-        var intText=""+int;
-        var text=table[x].innerHTML;
-        if(intText==text){
-            return true
+    return false;  
+} 
+function checkTable(table,int){
+    console.log(table)
+    for(var x=0;x<3;x++){
+        for(var y=0;y<3;y++){
+            if(table[x][y]===int){
+                return true;
+            }
         }
     }
-    return false
+    return false;
 }
 function checkFullBoard(){
     if(fullCells===81){
@@ -191,17 +214,39 @@ function checkFullBoard(){
     }
     return false;
 }
-function insertNum(num,line,row,table){
+function insertNum(num,line,row){
+    var table=getTable(row,line);
     if(checkLine(line,num)||checkRow(row,num)||checkTable(table,num)){
         return false;
     }
     else{
-        id="int"+row+""+line;
-        $("#"+id).html(num)
+        board[row][line]=num;
+        return true;
     }
 }
-var fullCells=0;
-window.onload=function(){
-    createBoard();
-    //fillBoard();
+function intoHtml(){
+    for(var x=0;x<9;x++){
+        for(var y=0;y<9;y++){
+            if(board[x][y]!==0){
+                $("#int"+x+""+y).html(board[x][y])
+            }
+        }
+    }
 }
+var ans=[]
+var array=[[7,5],[5,3],[4,8],[8,4],[1,6],[3,3],[8,6],[4,7],[2,1],[2,0],[2,5],[0,2],[5,2],[1,4],[7,4],[3,5],[4,2],[0,2],[4,3],[5,1],[2,3],[6,4],[6,3],[1,8],[1,6]]
+var nums=[5,3,8,4,5,5,2,4,5,8,5,1,5,7,8,4,5,3,5,4,6,4,3,4,1]
+function insertFixNumbers(){
+    for(var x=0;x<25;x++){
+        var t=insertNum(nums[x],array[x][0],array[x][1])
+        if(t){
+            ans.push(t)
+        }
+    }
+}
+var board
+var fullCells=0;
+// window.onload=function(){
+//     createBoard();
+//     fillBoard();
+// }
