@@ -1,9 +1,19 @@
 $(document).on("click",".int",function(){
     if(!$("#"+this.id).hasClass("Full")){
         var num=getNum();
-        $("#"+this.id).html(num)
-        $("#"+this.id).toggleClass("Full")
-        fullCells++;
+        var matrix=this.id.slice(3)
+        matrix=parseInt(matrix)
+        var row=Math.floor(matrix/10)
+        var line=matrix%10
+        if(!checkNum(num,row,line)){
+            $("#"+this.id).html(num)
+            $("#"+this.id).toggleClass("Full")
+            fullCells++;
+            board[row][line]=num;
+        }
+        else{
+            alert("theres another "+num+" that make it illegal")
+        }
     }
 })
 $("#checkEnd").click(function(){
@@ -81,6 +91,13 @@ function getNum(){
     else{
         return num;
     }
+}
+function checkNum(num,row,line){
+    var table=getTable(row,line);
+    if(checkLine(line,num)&&checkRow(row,line)&&checkTable(table,num)){
+        return true;
+    }
+    return false;
 }
 function createClearBoard(){
     return [
@@ -160,8 +177,10 @@ function getTable(numRow,numLine){
 }
 function findTable(rows,lines){
     var table=[[],[],[]];
+    console.log("rows "+rows+" lines "+lines)
     for(var x=0;x<3;x++){
         for(var y=0;y<3;y++){
+            console.log("row "+rows[x]+" lines "+lines[y])
             table[x][y]=board[rows[x]][lines[y]];
         }
     }
@@ -244,9 +263,13 @@ function insertFixNumbers(){
         }
     }
 }
+function solveBoard(){
+
+}
 var board
 var fullCells=0;
-// window.onload=function(){
-//     createBoard();
-//     fillBoard();
-// }
+window.onload=function(){
+    createBoard();
+     //fillBoard(45);
+     //intoHtml();
+}
