@@ -1,6 +1,7 @@
 $(document).on("click",".int",function(){
     if(!$("#"+this.id).hasClass("Full")){
         var num=getNum();
+        num=parseInt(num)
         var matrix=this.id.slice(3)
         matrix=parseInt(matrix)
         var row=Math.floor(matrix/10)
@@ -10,6 +11,7 @@ $(document).on("click",".int",function(){
             $("#"+this.id).toggleClass("Full")
             fullCells++;
             board[row][line]=num;
+            removeNumFronBank(num,line,row)
         }
         else{
             alert("theres another "+num+" that make it illegal")
@@ -76,7 +78,91 @@ function checkLineFull(){
     }
     return true
 }
+function removeNumFronBank(num,line,row){
+    RemoveNumFromBankLine(line,num)
+    RemoveNumFromBankRow(row,num)
+    var table=getBankTable(row,line)
+    RemoveNumFromBankTable(table,num)
+    return true;
+}
+function RemoveNumFromBankLine(line,num){
+    var index=num-1;
+    for(var x=0;x<9;x++){
+        console.log(bank[x][line]);
+        if(bank[x][line][index]===num){
+            bank[x][line].splice(index,1);
+        }
+        console.log(bank[x][line]);
+    }
 
+}
+function RemoveNumFromBankRow(row,num){
+    var index=num-1;
+    for(var x=0;x<9;x++){
+        console.log(bank[row][x]);
+        if(bank[row][x][index]===num){
+            bank[row][x].splice(index,1);
+        }
+        console.log(bank[row][x]);
+    }
+}
+function RemoveNumFromBankTable(table,num){
+    var row
+    var line
+    var index=num-1
+    for(z=0;z<9;z++){
+        row=table[z][0];
+        line=table[z][1]
+        console.log(bank[row][line]);
+        if(bank[row][line][index]===num){
+            bank[row][line].splice(index,1);
+        }
+        console.log(bank[row][line]);
+    }
+    return true;
+}
+function getBankTable(row,line){
+    var table=[
+        [],[],[],
+        [],[],[],
+        [],[],[]
+    ]    
+    switch(Math.floor(row/3)){
+        case 0:
+            row=0;
+            break;
+        case 1:
+            row=3;
+            break;
+        case 2:
+            row=6;
+            break;
+    }
+    switch(Math.floor(line/3)){
+        case 0:
+            line=0;
+            break;
+        case 1:
+            line=3;
+            break;
+        case 2:
+            line=6;
+            break;
+    }
+    var y=line;
+    for(var z=0;z<9;z++){
+        if(z%3===0){
+            line=y;
+        }
+        if(z%3===0 && z>1){
+            row++
+        }
+        table[z][0]=row;
+        table[z][1]=line;
+        line++;
+    }
+    return table
+}
 function fillLine(int){
     line=$(".Hight"+int)
     for(var x=0;x<9;x++){
@@ -94,10 +180,24 @@ function getNum(){
 }
 function checkNum(num,row,line){
     var table=getTable(row,line);
-    if(checkLine(line,num)&&checkRow(row,line)&&checkTable(table,num)){
-        return true;
-    }
-    return false;
+    var tof=false;
+    tof=tof || checkLine(line,num) || checkRow(row,num) || checkTable(table,num)
+    console.log(tof)
+    return tof
+}
+function createBank(){
+    var bank=[
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]],
+        [[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]]
+    ]
+    return bank;
 }
 function createClearBoard(){
     return [
@@ -114,6 +214,7 @@ function createClearBoard(){
 }
 function createBoard(){
     board=createClearBoard();
+    bank=createBank();
     console.log(board);
     for(var x=0; x<9;x++){
         $("#boardTable").append("<tr id=\"outR"+x+"\" class=\"row\"></tr")
@@ -253,8 +354,6 @@ function intoHtml(){
     }
 }
 var ans=[]
-var array=[[7,5],[5,3],[4,8],[8,4],[1,6],[3,3],[8,6],[4,7],[2,1],[2,0],[2,5],[0,2],[5,2],[1,4],[7,4],[3,5],[4,2],[0,2],[4,3],[5,1],[2,3],[6,4],[6,3],[1,8],[1,6]]
-var nums=[5,3,8,4,5,5,2,4,5,8,5,1,5,7,8,4,5,3,5,4,6,4,3,4,1]
 function insertFixNumbers(){
     for(var x=0;x<25;x++){
         var t=insertNum(nums[x],array[x][0],array[x][1])
@@ -266,6 +365,7 @@ function insertFixNumbers(){
 function solveBoard(){
 
 }
+var bank
 var board
 var fullCells=0;
 window.onload=function(){
