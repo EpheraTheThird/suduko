@@ -12,6 +12,7 @@ $(document).on("click",".int",function(){
             fullCells++;
             board[row][line]=num;
             removeNumFronBank(num,line,row)
+            bank[row][line]=0
         }
         else{
             alert("theres another "+num+" that make it illegal")
@@ -40,6 +41,45 @@ $("#checkEnd").click(function(){
         return false
     }
 })
+function solve(){
+    for(var x=0;x<9;x++){
+        for(var y=0;y<9;y++){
+            if(bank[x][y].length===1){
+                insertNumFromBank(bank[x][y][0],y,x)
+            }
+        }
+    }
+}
+function getRow(array,row){
+    for(x=0;x<array.length;x++){
+        if(array[x]!=0){
+            $("#int"+row+""+x).html(array[x])
+            $("#int"+row+""+x).toggleClass("Full")
+            fullCells++;
+            board[row][x]=array[x];
+            removeNumFronBank(array[x],x,row)
+            bank[row][x]=0
+        }
+    }
+}
+function insertNumFromBank(num,line,row){
+    board[row][line]=num;
+    bank[row][line]=0;
+    fullCells++
+    intoHtml()
+    removeNumFronBank(num,line,row)
+}
+function fillTestBoard(){
+    getRow([0,6,1,0,5,7,9,0,8],0)
+    getRow([0,8,3,2,6,9,0,7,5],1)
+    getRow([5,0,0,0,0,0,0,0,0],2)
+    getRow([0,0,0,8,1,0,3,0,0],3)
+    getRow([0,3,0,0,0,0,0,1,0],4)
+    getRow([0,0,4,0,9,5,0,0,0],5)
+    getRow([0,0,0,0,0,0,0,0,3],6)
+    getRow([1,4,0,5,7,3,8,9,0],7)
+    getRow([3,0,7,9,8,0,5,6,0],8)
+}
 function checkRowFull(){
     var t=false
     for(var x=1;x<=9;x++){
@@ -86,8 +126,9 @@ function removeNumFronBank(num,line,row){
     return true;
 }
 function RemoveNumFromBankLine(line,num){
-    var index=num-1;
+    var index
     for(var x=0;x<9;x++){
+        index=getIndex(num,x,line)
         console.log(bank[x][line]);
         if(bank[x][line][index]===num){
             bank[x][line].splice(index,1);
@@ -96,9 +137,19 @@ function RemoveNumFromBankLine(line,num){
     }
 
 }
+function getIndex(num,row,line){
+    var array=bank[row][line];
+    for(var x=0;x<array.length;x++){
+        if(array[x]===num){
+            return x;
+        }
+    }
+    return null;
+}
 function RemoveNumFromBankRow(row,num){
-    var index=num-1;
+    var index
     for(var x=0;x<9;x++){
+        index=getIndex(num,row,x)
         console.log(bank[row][x]);
         if(bank[row][x][index]===num){
             bank[row][x].splice(index,1);
@@ -109,8 +160,9 @@ function RemoveNumFromBankRow(row,num){
 function RemoveNumFromBankTable(table,num){
     var row
     var line
-    var index=num-1
+    var index
     for(z=0;z<9;z++){
+        index=getIndex(num,table[z][0],table[z][1])
         row=table[z][0];
         line=table[z][1]
         console.log(bank[row][line]);
@@ -361,9 +413,6 @@ function insertFixNumbers(){
             ans.push(t)
         }
     }
-}
-function solveBoard(){
-
 }
 var bank
 var board
