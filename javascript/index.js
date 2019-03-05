@@ -8,7 +8,7 @@ $(document).on("click",".int",function(){
         var line=matrix%10
         if(!checkNum(num,row,line)){
             $("#"+this.id).html(num)
-            $("#"+this.id).toggleClass("Full")
+            $("#"+this.id).toggleClass("Full playerNum")
             fullCells++;
             board[row][line]=num;
             removeNumFronBank(num,line,row)
@@ -41,13 +41,270 @@ $("#checkEnd").click(function(){
         return false
     }
 })
+$("#reset").click(function(){
+    board=createClearBoard()
+    bank=createBank()
+    clearHtml()
+})
+function copyArray(array){
+    var ans=[]
+    for(var x=0;x<array.length;x++){
+        ans[x]=array[x]
+    }
+    return ans
+}
+function substractArray(array1,array2){
+    var deletedNums=0
+    var firstTime=true;
+    array1=copyArray(array1)
+    for(var x=0;x<(array1.length-deletedNums);x++){
+        for(var y=0;y<array2.length;y++){
+            if(array1[x]==array2[y]){
+                array1.splice(x,1);
+                y=0;
+                if(firstTime){
+                    firstTime=false
+                }
+                else{
+                    deletedNums++
+                }
+            }
+        }
+    }
+    return array1
+}
 function solve(){
+    var stage2=true
+    var stage1=true
+    while(stage1||stage2){
+        stage2=solveStage2()
+        while(stage2){
+            stage2=solveStage2()
+        }
+        stage1=solveStage1()
+        while(stage1){
+            stage1=solveStage1()
+        }
+        stage2=solveStage2()
+    }
+}
+//naked singels
+function solveStage1(){
+    var numOFChanges=0
     for(var x=0;x<9;x++){
         for(var y=0;y<9;y++){
             if(bank[x][y].length===1){
                 insertNumFromBank(bank[x][y][0],y,x)
+                numOFChanges++
             }
         }
+    }
+    if(numOFChanges===0){
+        return false
+    }
+    return true;
+}
+function checkTableForSingleNunber(array,num,table){
+    var cnt=0 ,index
+    for(var x=0;x<package;x++){
+        if(checkArrayFromBank(array,num)){
+            cnt++
+            index=x
+        }
+    }
+    if(cnt===1){
+        insertNumFromBank(num,table[1],table[0])
+    }
+}
+function checkArrayFromBank(array,num){
+    for(var x=0;x<9;x++){
+        if(array[x]===num){
+            return true
+        }
+    }
+    return false;
+}
+function checkRowBankForSingeleNum(row,num){
+    var cnt=0, line=0
+    for(var x=0;x<9;x++){
+        if(checkArrayFromBank(bank[row][x],num)){
+            cnt++
+            line=x
+        }
+    }
+    if(cnt===1){
+        return line
+    }
+    return 13
+}
+function checkLineBankForSingeleNum(line,num){
+    var cnt=0,row=0
+    for(var x=0;x<9;x++){
+        if(checkArrayFromBank(bank[x][line],num)){
+            cnt++
+            row=x
+        }
+    }
+    if(cnt===1){
+        return row
+    }
+    else{
+        return 13
+    }
+}
+function checkHiddenSingaleLine(){
+    for(var x=0;x<9;x++){
+        for(var y=1;y<10;y++){
+            var row=checkLineBankForSingeleNum(x,y)
+            if(row!==13){
+                insertNumFromBank(y,line,x)
+            }
+        }
+    }
+}
+function checkHiddenSingaleTable(){
+    for(var x=0;x<9;x++){
+        switch(x){
+            case 0:
+                var row=0
+                var line=0
+                break
+            case 1:
+                var row=0
+                var line=3
+                break
+            case 2:
+                var row=0
+                var line=6
+                break;
+            case 3:
+                var row=3
+                var line=0
+                break;
+            case 4:
+                var row=3
+                var line=3
+                break;
+            case 5:
+                var row=3
+                var line=6
+            case 6:
+                var row=6
+                var line=0
+                break
+            case 7:
+                var row=6
+                var line=3
+                break
+            case 8:
+                var row=6
+                var line=6
+        }
+        var table=getBankTable(row,line)
+        var array
+        for(var x=0;x<9;x++){
+            array[x]=bank[table[0]][table[1]]
+        }
+        for(var x=1;x<10;x++){
+            checkTableForSingleNunber(array,x)
+        }
+    }
+}
+function checkHiddenSingaleRow(){
+    for(var x=0;x<9;x++){
+        for(var y=1;y<10;y++){
+            var line=checkRowBankForSingeleNum(x,y)
+            if(line!==13){
+                insertNumFromBank(y,x,row)
+            }
+        }
+    }
+}
+//hidden single
+function solveHiddenSingels(){
+    checkHiddenSingaleLine()
+    checkHiddenSingaleRow()
+    checkHiddenSingaleTable()
+}
+function uniqCell(array,row,line){
+    var array1
+    var cnt=0
+    for(var x=row;x<row+3;x++){
+        for(var y=line;y<line+3;y++){
+            array1=bank[x][y];
+            var a=substractArray(array,array1)
+            if(a.length===0){
+                cnt++
+            }
+        }
+    }
+    if(cnt==0){
+        return true
+    }
+    return false
+}
+function showTableBank(row,line){
+    var l=line
+    for(var x=0;x<3;x++){
+        for(var y=0;y<3;y++){
+            for(var z=0;z<bank[row][line].length;z++){
+                console.log("row :"+row+" line "+line+" is:"+bank[row][line][z])
+            }
+            line++
+        }
+        line=l
+        row++
+    }
+}
+function solveStage2(){
+    var array
+    var numOFChanges=0
+    var a1
+    for(var row=0;row<9;row++){
+        for(var line=0;line<9;line++){
+            array=bank[row][line]
+            console.log(array)
+            if(array===0){
+                continue;
+            }
+            var placeRow=(Math.floor(row/3))*3
+            var placeLine=(Math.floor(line/3))*3
+            a1=array
+            for(var tableRow=0;tableRow<3;tableRow++){
+                for(var tableLine=0;tableLine<3;tableLine++){
+                    var x=bank[row][line]
+                    console.log(bank[placeRow+tableRow][placeLine+tableLine]+" "+array)
+                    if(placeLine+tableLine===line&&placeRow+tableRow===row){
+                        continue;
+                    }
+                    if(bank[placeRow+tableRow][placeLine+tableLine]===0){
+                        continue;
+                    }
+                    a1=substractArray(a1,bank[placeRow+tableRow][placeLine+tableLine])
+                    }
+                }
+                if(a1.length===1){
+                    if(!checkLine(line,a1[0])){
+                        if(!checkRow(row,a1[0])){
+                            insertNumFromBank(a1[0],line,row)
+                            numOFChanges++
+                        }
+                    }
+                }
+            }
+
+        }
+        if(numOFChanges===0){
+            return false;
+        }
+        return true;
+    }
+function compareToSolution(num,row,line){
+    if(num===fullBoard[row][line]){
+        return true;
+    }
+    else{
+        return false;
     }
 }
 function getRow(array,row){
@@ -69,7 +326,7 @@ function insertNumFromBank(num,line,row){
     intoHtml()
     removeNumFronBank(num,line,row)
 }
-function fillTestBoard(){
+function fillTestBoardEasy(){
     getRow([0,6,1,0,5,7,9,0,8],0)
     getRow([0,8,3,2,6,9,0,7,5],1)
     getRow([5,0,0,0,0,0,0,0,0],2)
@@ -79,6 +336,29 @@ function fillTestBoard(){
     getRow([0,0,0,0,0,0,0,0,3],6)
     getRow([1,4,0,5,7,3,8,9,0],7)
     getRow([3,0,7,9,8,0,5,6,0],8)
+    fullBoard=[
+        [2,6,1,4,5,7,9,3,8],
+        [4,8,3,2,6,9,1,7,5],
+        [5,7,9,1,3,8,4,2,6],
+        [7,9,2,8,1,6,3,5,4],
+        [8,3,5,7,4,2,6,1,9],
+        [6,1,4,3,9,5,2,8,7],
+        [9,5,8,6,2,1,7,4,3],
+        [1,4,6,5,7,3,8,9,2],
+        [3,2,7,9,8,4,5,6,1],
+
+    ]
+}
+function fillTestBoardMidum(){
+    getRow([0,0,5,0,0,6,0,8,0],0)
+    getRow([0,0,0,0,0,2,0,9,0],1)
+    getRow([0,0,1,5,0,4,0,0,2],2)
+    getRow([0,6,2,0,0,1,0,0,4],3)
+    getRow([0,0,4,0,0,0,8,0,0],4)
+    getRow([7,0,0,4,0,0,2,3,0],5)
+    getRow([3,0,0,6,0,9,1,0,0],6)
+    getRow([0,5,0,2,0,0,0,0,0],7)
+    getRow([0,9,0,7,0,0,3,0,0],8)
 }
 function checkRowFull(){
     var t=false
@@ -405,6 +685,13 @@ function intoHtml(){
         }
     }
 }
+function clearHtml(){
+    for(var x=0;x<9;x++){
+        for(var y=0;y<9;y++){
+                $("#int"+x+""+y).html("")
+        }
+    }
+}
 var ans=[]
 function insertFixNumbers(){
     for(var x=0;x<25;x++){
@@ -414,6 +701,7 @@ function insertFixNumbers(){
         }
     }
 }
+var fullBoard
 var bank
 var board
 var fullCells=0;
